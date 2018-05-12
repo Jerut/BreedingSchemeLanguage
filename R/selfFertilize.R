@@ -26,7 +26,7 @@ selfFertilize <- function(sEnv=NULL, nProgeny=100, popID=NULL, parms=NULL){
     geno <- makeSelfs(popSize=nProgeny, geno=geno, pos=locPos)
     pedigree <- cbind(matrix(GIDpar[geno$pedigree], nProgeny), 1)
     geno <- geno$progenies
-    data <- addProgenyData(data, geno, pedigree)
+    data <- addProgenyData(data, geno, pedigree, NA)
     if (exists("totalCost", data)) data$totalCost <- data$totalCost + nProgeny * data$costs$selfCost
     return(data)
   }
