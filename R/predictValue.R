@@ -426,6 +426,21 @@ predictValue <- function(sEnv=NULL, popID=NULL, trainingPopID=NULL, locations=NU
       predict <- kbo$g
       predGID <- as.integer(names(predict))
     }
+    ########################################################
+    # predict F1 value based on parents
+    if (sharingInfo == "parents") {#get predicted values of F1s based on parents
+    	gRec<- bsl$genoRec
+    	prRec<- bsl$predRec
+    	f1genoix<- which(gRec[,'popID']==popID)
+    	gRec<- gRec[f1genoix,]
+    	p1blp<- prRec[match(gRec[,2],prRec[,1]),3]
+    	p2blp<- prRec[match(gRec[,3],prRec[,1]),3]
+    	predict<- (p1blp+p2blp)/2 #predictions of the genos in gRec
+    	if(length(unique(predict))<length(predict)){
+    		predict[-match(unique(predict), predict)]<- -Inf
+    	}
+    		predGID<- gRec[,1]
+  	}
         
     if(is.null(bsl$predRec)){
       predNo <- 1
