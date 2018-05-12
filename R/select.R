@@ -48,6 +48,7 @@ select <- function(sEnv=NULL, nSelect=40, popID=NULL, random=F, type="Mass", par
         if (length(GIDcan) == 0) stop(paste("There are no selection candidates in the population", popID, "with predictions"))
         usePred <- bsl$predRec[bsl$predRec$predGID %in% GIDcan & bsl$predRec$predNo == max(bsl$predRec$predNo),]
         candValue <- usePred$predict[order(usePred$predGID)]
+        GIDcan<- usePred[order(usePred$predGID),'predGID']
       }
       # Done computing the candidate values
       if (type == "WithinFamily"){
