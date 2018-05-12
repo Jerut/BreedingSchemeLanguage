@@ -46,7 +46,7 @@ initializePopulation <- function(sEnv=NULL, nInd=100, founderHapsInDiploids=F, p
     yearEffects <- matrix(0, nrow=nInd, ncol=0)
     yearEffectsI <- matrix(0, nrow=nInd, ncol=0)
     
-    genoRec <- data.frame(GID=1:nInd, pedigree=pedigree, popID=0, basePopID=0, hasGeno=FALSE)
+    genoRec <- data.frame(GID=1:nInd, pedigree=pedigree, popID=0, basePopID=0, hasGeno=FALSE, crossYear=0)
     data$mapData <- md
     data$nFounders <- nInd
     data$geno <- geno; data$genoRec <- genoRec; data$gValue <- gValue

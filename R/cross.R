@@ -14,7 +14,7 @@
 #'@return modifies the list sims in environment sEnv by creating a progeny population as specified, with an incremented population number
 #'
 #'@export
-cross <- function(sEnv=NULL, nProgeny=100, equalContribution=F, popID=NULL, popID2=NULL, notWithinFam=F, pedigree=NULL, parms=NULL){
+cross <- function(sEnv=NULL, nProgeny=100, equalContribution=F, popID=NULL, popID2=NULL, notWithinFam=F, pedigree=NULL, parms=NULL, year=NA){
   if(!is.null(parms)){
     for (n in 1:length(parms)){
       assign(names(parms)[n], parms[[n]])
@@ -65,7 +65,7 @@ cross <- function(sEnv=NULL, nProgeny=100, equalContribution=F, popID=NULL, popI
         pedigree <- cbind(GID.1[parents[,1]], GID.2[parents[,2]-nPar1], 0)
       }
     }#END no pedigree was given
-    bsl <- addProgenyData(bsl, geno, pedigree)
+    bsl <- addProgenyData(bsl, geno, pedigree, year)
     if (exists("totalCost", bsl)) bsl$totalCost <- bsl$totalCost + nProgeny * bsl$costs$crossCost
     return(bsl)
   }#END cross.func
@@ -97,7 +97,7 @@ cross <- function(sEnv=NULL, nProgeny=100, equalContribution=F, popID=NULL, popI
 #' Normally DH=-1, outbred=0, self=nGen of selfing but that is not currenly properly updated
 #'@return data with progeny information added
 #'
-addProgenyData <- function(bsl, geno, pedigree){
+addProgenyData <- function(bsl, geno, pedigree, crossYear){
   # Add on to genetic values
   gValue <- calcGenotypicValue(geno=geno, mapData=bsl$mapData)
   bsl$gValue <- rbind(bsl$gValue, gValue)
@@ -133,7 +133,8 @@ addProgenyData <- function(bsl, geno, pedigree){
   GID <- max(bsl$genoRec$GID) + 1:nProgeny
   popID <- rep(max(bsl$genoRec$popID) + 1, nProgeny)
   hasGeno <- rep(FALSE, nProgeny)
-  addRec <- data.frame(GID=GID, pedigree=pedigree, popID=popID, basePopID=popID, hasGeno=hasGeno)
+  addRec <- data.frame(GID=GID, pedigree=pedigree, popID=popID, basePopID=popID, 
+                       hasGeno=hasGeno,crossYear=crossYear)
   colnames(addRec) <- colnames(bsl$genoRec)
   bsl$genoRec <- rbind(bsl$genoRec, addRec)
   # Add on to the genotypes
