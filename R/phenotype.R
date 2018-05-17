@@ -31,82 +31,88 @@ phenotype <- function(sEnv=NULL, plotType="Standard", nRep=1, popID=NULL, locati
     }
     tf <- bsl$genoRec$popID %in% popID
     nPhen <- sum(tf)
-    nLoc <- length(locations)
-    nYr <- length(years)
-    nTrial <- nYr
-    if (bsl$varParms$randLoc){
-      nTrial <- nTrial * nLoc
-      pValue <- calcPhenotypicValue(gv=bsl$gValue[tf,,drop=F], nRep=nTrial, errorVar=errorVar)
-    } else{
-      if (!all(locations %in% 1:ncol(bsl$gValue))){
-        stop("Phenotyping at unknown locations")
-      }
-      pValue <- calcPhenotypicValue(gv=bsl$gValue[tf, locations, drop=F], nRep=nTrial, errorVar=errorVar)
-    }
-    # Year and location effects to add in
-    nInd <- max(bsl$genoRec$GID)
-    nAdd <- max(years) - ncol(bsl$yearEffects) # One col per year
-    if (nAdd > 0 | (bsl$varParms$randLoc & max(locations) > ncol(bsl$locEffects))){
-      M <- bsl$geno[1:nInd * 2 - 1, bsl$mapData$effectivePos] + bsl$geno[1:nInd * 2, bsl$mapData$effectivePos]
-      nEffLoc <- length(bsl$mapData$effectivePos)
-    }
-    if (nAdd > 0){
-      # Create GxY effects
-      vp <- bsl$varParms$gByYearVar * bsl$varParms$fracGxEAdd
-      gByYqtl <- matrix(stats::rbinom(nEffLoc * nAdd, 1, 0.5), nEffLoc) * 2 - 1
-      bsl$gByYqtl <- cbind(bsl$gByYqtl, gByYqtl)
-      toAdd <- M %*% gByYqtl
-      sdFound <- 1 / apply(toAdd[1:bsl$nFounders, , drop=F], 2, stats::sd) * sqrt(vp)
-      toAdd <- sapply(1:length(sdFound), function(i) toAdd[,i] * sdFound[i])
-      bsl$yearScale <- c(bsl$yearScale, sdFound)
-      bsl$yearEffects <- cbind(bsl$yearEffects, toAdd)
-      vp <- bsl$varParms$gByYearVar * (1 - bsl$varParms$fracGxEAdd)
-      toAdd <- matrix(stats::rnorm(nInd * nAdd, sd=sqrt(vp)), nInd)
-      bsl$yearEffectsI <- cbind(bsl$yearEffectsI, toAdd)
-      if (exists("totalCost", bsl)){
-        bsl$totalCost <- bsl$totalCost + nAdd * bsl$costs$yearCost
-      }
-    }
-    nAdd <- max(locations) - ncol(bsl$locEffects)
-    if (bsl$varParms$randLoc & nAdd > 0){
-      vp <- bsl$varParms$gByLocVar * bsl$varParms$fracGxEAdd
-      gByLqtl <- matrix(stats::rbinom(nEffLoc * nAdd, 1, 0.5), nEffLoc) * 2 - 1
-      bsl$gByLqtl <- cbind(bsl$gByLqtl, gByLqtl)
-      toAdd <- M %*% gByLqtl
-      sdFound <- 1 / apply(toAdd[1:bsl$nFounders, , drop=F], 2, stats::sd) * sqrt(vp)
-      toAdd <- sapply(1:length(sdFound), function(i) toAdd[,i] * sdFound[i])
-      bsl$locScale <- c(bsl$locScale, sdFound)
-      bsl$locEffects <- cbind(bsl$locEffects, toAdd)
-      vp <- bsl$varParms$gByLocVar * (1 - bsl$varParms$fracGxEAdd)
-      toAdd <- matrix(stats::rnorm(nInd * nAdd, sd=sqrt(vp)), nInd)
-      bsl$locEffectsI <- cbind(bsl$locEffectsI, toAdd)
-      if (exists("totalCost", bsl)){
-        bsl$totalCost <- bsl$totalCost + nAdd * bsl$costs$locCost
-      }
-    }
-    if (bsl$varParms$randLoc){
-      pValue <- pValue + c(bsl$locEffects[tf, locations] + bsl$locEffectsI[tf, locations])
-    }
-    ye <- NULL
-    for (i in years) ye <- c(ye, rep(bsl$yearEffects[tf,i], nLoc))
-    pValue <- pValue + ye
-    ye <- NULL
-    for (i in years) ye <- c(ye, rep(bsl$yearEffectsI[tf,i], nLoc))
-    pValue <- pValue + ye
-    loc <- rep(locations, each=nPhen)
-    yr <- rep(years, each=nPhen*nLoc)
     
-    toAdd <- data.frame(phenoGID=bsl$genoRec$GID[tf], loc=loc, year=yr, error=errorVar, pValue=pValue)
-    bsl$phenoRec <- rbind(bsl$phenoRec, toAdd)
-
-    bsl$selCriterion <- list(popID=popID, criterion="pheno", sharing="none")
-    # Take care of costs
-    if (exists("totalCost", bsl)){
-      perPlotCost <- bsl$costs$phenoCost[plotType]
-      bsl$totalCost <- bsl$totalCost + nPhen * perPlotCost * nLoc * nYr * nRep
+    if(nPhen>0){
+      nLoc <- length(locations)
+      nYr <- length(years)
+      nTrial <- nYr
+      if (bsl$varParms$randLoc){
+        nTrial <- nTrial * nLoc
+        pValue <- calcPhenotypicValue(gv=bsl$gValue[tf,,drop=F], nRep=nTrial, errorVar=errorVar)
+      } else{
+        if (!all(locations %in% 1:ncol(bsl$gValue))){
+          stop("Phenotyping at unknown locations")
+        }
+        pValue <- calcPhenotypicValue(gv=bsl$gValue[tf, locations, drop=F], nRep=nTrial, errorVar=errorVar)
+      }
+      # Year and location effects to add in
+      nInd <- max(bsl$genoRec$GID)
+      nAdd <- max(years) - ncol(bsl$yearEffects) # One col per year
+      if (nAdd > 0 | (bsl$varParms$randLoc & max(locations) > ncol(bsl$locEffects))){
+        M <- bsl$geno[1:nInd * 2 - 1, bsl$mapData$effectivePos] + bsl$geno[1:nInd * 2, bsl$mapData$effectivePos]
+        nEffLoc <- length(bsl$mapData$effectivePos)
+      }
+      if (nAdd > 0){
+        # Create GxY effects
+        vp <- bsl$varParms$gByYearVar * bsl$varParms$fracGxEAdd
+        gByYqtl <- matrix(stats::rbinom(nEffLoc * nAdd, 1, 0.5), nEffLoc) * 2 - 1
+        bsl$gByYqtl <- cbind(bsl$gByYqtl, gByYqtl)
+        toAdd <- M %*% gByYqtl
+        sdFound <- 1 / apply(toAdd[1:bsl$nFounders, , drop=F], 2, stats::sd) * sqrt(vp)
+        toAdd <- sapply(1:length(sdFound), function(i) toAdd[,i] * sdFound[i])
+        bsl$yearScale <- c(bsl$yearScale, sdFound)
+        bsl$yearEffects <- cbind(bsl$yearEffects, toAdd)
+        vp <- bsl$varParms$gByYearVar * (1 - bsl$varParms$fracGxEAdd)
+        toAdd <- matrix(stats::rnorm(nInd * nAdd, sd=sqrt(vp)), nInd)
+        bsl$yearEffectsI <- cbind(bsl$yearEffectsI, toAdd)
+        if (exists("totalCost", bsl)){
+          bsl$totalCost <- bsl$totalCost + nAdd * bsl$costs$yearCost
+        }
+      }
+      nAdd <- max(locations) - ncol(bsl$locEffects)
+      if (bsl$varParms$randLoc & nAdd > 0){
+        vp <- bsl$varParms$gByLocVar * bsl$varParms$fracGxEAdd
+        gByLqtl <- matrix(stats::rbinom(nEffLoc * nAdd, 1, 0.5), nEffLoc) * 2 - 1
+        bsl$gByLqtl <- cbind(bsl$gByLqtl, gByLqtl)
+        toAdd <- M %*% gByLqtl
+        sdFound <- 1 / apply(toAdd[1:bsl$nFounders, , drop=F], 2, stats::sd) * sqrt(vp)
+        toAdd <- sapply(1:length(sdFound), function(i) toAdd[,i] * sdFound[i])
+        bsl$locScale <- c(bsl$locScale, sdFound)
+        bsl$locEffects <- cbind(bsl$locEffects, toAdd)
+        vp <- bsl$varParms$gByLocVar * (1 - bsl$varParms$fracGxEAdd)
+        toAdd <- matrix(stats::rnorm(nInd * nAdd, sd=sqrt(vp)), nInd)
+        bsl$locEffectsI <- cbind(bsl$locEffectsI, toAdd)
+        if (exists("totalCost", bsl)){
+          bsl$totalCost <- bsl$totalCost + nAdd * bsl$costs$locCost
+        }
+      }
+      if (bsl$varParms$randLoc){
+        pValue <- pValue + c(bsl$locEffects[tf, locations] + bsl$locEffectsI[tf, locations])
+      }
+      ye <- NULL
+      for (i in years) ye <- c(ye, rep(bsl$yearEffects[tf,i], nLoc))
+      pValue <- pValue + ye
+      ye <- NULL
+      for (i in years) ye <- c(ye, rep(bsl$yearEffectsI[tf,i], nLoc))
+      pValue <- pValue + ye
+      loc <- rep(locations, each=nPhen)
+      yr <- rep(years, each=nPhen*nLoc)
+      
+      toAdd <- data.frame(phenoGID=bsl$genoRec$GID[tf], loc=loc, year=yr, error=errorVar, pValue=pValue)
+      bsl$phenoRec <- rbind(bsl$phenoRec, toAdd)
+  
+      bsl$selCriterion <- list(popID=popID, criterion="pheno", sharing="none")
+      # Take care of costs
+      if (exists("totalCost", bsl)){
+        perPlotCost <- bsl$costs$phenoCost[plotType]
+        bsl$totalCost <- bsl$totalCost + nPhen * perPlotCost * nLoc * nYr * nRep
+      }
+      return(bsl)
+    }else{
+      return(bsl)
+      message(paste('no phenotyping was done, population', popID,  'does not exist\n', sep=" "))
     }
-    return(bsl)
-  }
+  }#end of phenotype fcn
   
   
   if(is.null(sEnv)){
