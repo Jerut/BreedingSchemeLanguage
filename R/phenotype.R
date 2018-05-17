@@ -31,7 +31,6 @@ phenotype <- function(sEnv=NULL, plotType="Standard", nRep=1, popID=NULL, locati
     }
     tf <- bsl$genoRec$popID %in% popID
     nPhen <- sum(tf)
-    
     if(nPhen>0){
       nLoc <- length(locations)
       nYr <- length(years)
@@ -107,14 +106,10 @@ phenotype <- function(sEnv=NULL, plotType="Standard", nRep=1, popID=NULL, locati
         perPlotCost <- bsl$costs$phenoCost[plotType]
         bsl$totalCost <- bsl$totalCost + nPhen * perPlotCost * nLoc * nYr * nRep
       }
-      return(bsl)
-    }else{
-      return(bsl)
-      message(paste('no phenotyping was done, population', popID,  'does not exist\n', sep=" "))
     }
+    return(bsl)
   }#end of phenotype fcn
-  
-  
+
   if(is.null(sEnv)){
     if(exists("simEnv", .GlobalEnv)){
       sEnv <- get("simEnv", .GlobalEnv)
@@ -123,6 +118,7 @@ phenotype <- function(sEnv=NULL, plotType="Standard", nRep=1, popID=NULL, locati
     }
   } 
   parent.env(sEnv) <- environment()
+  sims0<- with(sEnv, sims)
   with(sEnv, {
     if(nCore > 1){
       sfInit(parallel=T, cpus=nCore)
@@ -132,4 +128,9 @@ phenotype <- function(sEnv=NULL, plotType="Standard", nRep=1, popID=NULL, locati
       sims <- lapply(sims, phenotype.func, plotType=plotType, nRep=nRep, popID=popID, locations=locations, years=years)
     }
   })
+  
+  if(identical(with(sEnv, sims), sims0)){
+    message(paste('no phenotyping was done, population', popID,  'does not exist\n', sep=" "))
+  }
+  
 }

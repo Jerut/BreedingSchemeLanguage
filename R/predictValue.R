@@ -293,10 +293,8 @@ predictValue <- function(sEnv=NULL, popID=NULL, trainingPopID=NULL, locations=NU
   
       bsl$selCriterion <- list(popID=popID, criterion="pred")
       if (exists("totalCost", bsl)) bsl$totalCost <- bsl$totalCost + bsl$costs$predCost
+    }
       return(bsl)
-    }else{
-      return(bsl)
-      message(paste('no prediction was done, population', popID, 'does not exist\n', sep=" "))
     }
   }#END predict.func
   if(is.null(sEnv)){
@@ -306,7 +304,8 @@ predictValue <- function(sEnv=NULL, popID=NULL, trainingPopID=NULL, locations=NU
       stop("No simulation environment was passed")
     }
   } 
-  parent.env(sEnv) <- environment()
+  parent.env(sEnv) <- environment()  
+  sims0<- with(sEnv, sims)
   with(sEnv, {
     if(nCore > 1){
       snowfall::sfInit(parallel=T, cpus=nCore)
@@ -316,4 +315,7 @@ predictValue <- function(sEnv=NULL, popID=NULL, trainingPopID=NULL, locations=NU
       sims <- lapply(sims, predictValue.func, popID=popID, trainingPopID=trainingPopID, locations=locations, years=years, sharingInfo=sharingInfo)
     }
   })
+  if(with(sEnv, sims)==sims0){
+    message(paste('no prediction was done, population', popID,  'does not exist\n', sep=" "))
+  }
 }
