@@ -295,8 +295,7 @@ predictValue <- function(sEnv=NULL, popID=NULL, trainingPopID=NULL, locations=NU
       if (exists("totalCost", bsl)) bsl$totalCost <- bsl$totalCost + bsl$costs$predCost
     }
       return(bsl)
-    }
-  }#END predict.func
+    }#END predict.func
   if(is.null(sEnv)){
     if(exists("simEnv", .GlobalEnv)){
       sEnv <- get("simEnv", .GlobalEnv)
