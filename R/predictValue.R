@@ -314,7 +314,7 @@ predictValue <- function(sEnv=NULL, popID=NULL, trainingPopID=NULL, locations=NU
       sims <- lapply(sims, predictValue.func, popID=popID, trainingPopID=trainingPopID, locations=locations, years=years, sharingInfo=sharingInfo)
     }
   })
-  if(with(sEnv, sims)==sims0){
-    message(paste('no prediction was done, population', popID,  'does not exist\n', sep=" "))
+  if(identical(with(sEnv, sims), sims0)){
+    message(paste('no phenotyping was done, population', popID,  'does not exist\n', sep=" "))
   }
 }
