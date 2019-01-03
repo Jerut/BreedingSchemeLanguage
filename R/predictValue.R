@@ -240,7 +240,11 @@ predictValue <- function(sEnv=NULL, popID=NULL, trainingPopID=NULL, locations=NU
         K <- rrBLUP::A.mat(M)
         rownames(K) <- colnames(K) <- predGID
         kbDat <- subset(phenoRec, phenoRec$phenoGID %in% predGID)
-        kbo <- kin.blup4.4(kbDat, geno="phenoGID", pheno="pValue", fixed=c("loc", "year"), K=K, reduce=mt1ObsPerGID, R=kbDat$error)
+        if(bsl$varParms$gByYearVar * bsl$varParms$fracGxEAdd >0){
+          kbo <- kin.blup4.4(kbDat, geno="phenoGID", pheno="pValue", fixed=c("loc", "year"), K=K, reduce=mt1ObsPerGID, R=kbDat$error)
+        }else{
+          kbo <- kin.blup4.4(kbDat, geno="phenoGID", pheno="pValue", K=K, reduce=mt1ObsPerGID, R=kbDat$error)
+        }
         predict <- kbo$g
         predGID <- as.integer(names(predict))
       }
