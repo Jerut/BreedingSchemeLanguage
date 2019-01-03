@@ -32,8 +32,8 @@ predictValue <- function(sEnv=NULL, popID=NULL, trainingPopID=NULL, locations=NU
         mt1ObsPerGID <- length(unique(phenoRec$phenoGID)) < nrow(phenoRec)
         if (mt1ObsPerGID){ # More than one observation per GID: run a model
           fmla <- "pValue ~ (1|phenoGID)"
-          if (length(unique(phenoRec$year))) fmla <- paste(fmla, "+ year + (1|phenoGID:year)")
-          if (length(unique(phenoRec$loc))) fmla <- paste(fmla, "+ loc + (1|phenoGID:loc)")
+          if (length(unique(paste(phenoRec$year, phenoRec$GID))) > nrow(phenoRec)) fmla <- paste(fmla, "+ year + (1|phenoGID:year)")
+          if (length(unique(paste(phenoRec$loc, phenoRec$GID))) > nrow(phenoRec)) fmla <- paste(fmla, "+ loc + (1|phenoGID:loc)")
           phenoRec$phenoGID <- factor(phenoRec$phenoGID)
           phenoRec$loc <- factor(phenoRec$loc)
           phenoRec$year <- factor(phenoRec$year)
