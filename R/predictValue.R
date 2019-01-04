@@ -33,9 +33,9 @@ predictValue <- function(sEnv=NULL, popID=NULL, trainingPopID=NULL, locations=NU
         if (mt1ObsPerGID){ # More than one observation per GID: run a model
           fmla <- "pValue ~ (1|phenoGID)"
           if (length(unique(phenoRec$year))>1 &  bsl$varParms$gByYearVar * bsl$varParms$fracGxEAdd >0 ) fmla <- paste(fmla, "+ year")
-          if (length(unique(phenoRec$loc))>1 &  bsl$varParms$gByYearVar * bsl$varParms$fracGxEAdd >0 ) fmla <- paste(fmla, "+ loc")
+          if (length(unique(phenoRec$loc))>1 &  bsl$varParms$gByLocVar * bsl$varParms$fracGxEAdd >0 ) fmla <- paste(fmla, "+ loc")
           if (length(unique(paste(phenoRec$year, phenoRec$GID))) > nrow(phenoRec)  &  bsl$varParms$gByYearVar * bsl$varParms$fracGxEAdd >0) fmla <- paste(fmla, "+ (1|phenoGID:year)")
-          if (length(unique(paste(phenoRec$loc, phenoRec$GID))) > nrow(phenoRec)  &  bsl$varParms$gByYearVar * bsl$varParms$fracGxEAdd >0) fmla <- paste(fmla, "+ (1|phenoGID:loc)")
+          if (length(unique(paste(phenoRec$loc, phenoRec$GID))) > nrow(phenoRec)  &  bsl$varParms$gByLocVar * bsl$varParms$fracGxEAdd >0) fmla <- paste(fmla, "+ (1|phenoGID:loc)")
           phenoRec$phenoGID <- factor(phenoRec$phenoGID)
           phenoRec$loc <- factor(phenoRec$loc)
           phenoRec$year <- factor(phenoRec$year)
@@ -240,7 +240,7 @@ predictValue <- function(sEnv=NULL, popID=NULL, trainingPopID=NULL, locations=NU
         K <- rrBLUP::A.mat(M)
         rownames(K) <- colnames(K) <- predGID
         kbDat <- subset(phenoRec, phenoRec$phenoGID %in% predGID)
-        if(bsl$varParms$gByYearVar * bsl$varParms$fracGxEAdd >0){
+        if(bsl$varParms$gByLocVar + bsl$varParms$gByYearVar >0){
           kbo <- kin.blup4.4(kbDat, geno="phenoGID", pheno="pValue", fixed=c("loc", "year"), K=K, reduce=mt1ObsPerGID, R=kbDat$error)
         }else{
           kbo <- kin.blup4.4(kbDat, geno="phenoGID", pheno="pValue", K=K, reduce=mt1ObsPerGID, R=kbDat$error)
